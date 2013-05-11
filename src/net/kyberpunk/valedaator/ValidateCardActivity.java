@@ -1,6 +1,7 @@
 package net.kyberpunk.valedaator;
 
 import java.io.StringWriter;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -59,6 +60,7 @@ public class ValidateCardActivity extends Activity {
 	protected String cardnr = null;
 	protected String dataBase64 = null;
 	protected Button cloneButton = null;
+	protected Button fiveButton = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -208,11 +210,14 @@ public class ValidateCardActivity extends Activity {
 			pleaseWaitDialog.dismiss();
 
 			if (result != null) {
-				sum.setText("Summa: " + result + " EUR");
+				double summa = Double.parseDouble(result);
+				DecimalFormat nice = new DecimalFormat("###.##");
+
+				sum.setText("Summa: " + nice.format(summa) + " EUR");
 				sum.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30);
 
 				// TODO: "fix" pilet.ee and round 0.399999999999 to 0.40 ?
-				if (Float.parseFloat(result) > 0) {
+				if (summa > 0) {
 					view.setBackgroundColor(Color.parseColor("#529D00"));
 
 					TextView peatus = new TextView(ValidateCardActivity.this);
@@ -245,6 +250,7 @@ public class ValidateCardActivity extends Activity {
 						}
 					});
 					view.addView(cloneButton);
+
 				} else {
 					view.setBackgroundColor(Color.parseColor("#FF3300"));
 
@@ -252,6 +258,20 @@ public class ValidateCardActivity extends Activity {
 					peatus.setText("Järgmine peatus: " + peatused[new Random().nextInt(peatused.length - 1)] + "\n\n\n");
 					view.addView(peatus);
 				}
+
+				// Send five euros
+				fiveButton = new Button(ValidateCardActivity.this);
+				fiveButton.setText("Lae viiekas!");
+				fiveButton.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						Intent callIntent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:1322*605*" + cardnr));
+						startActivity(callIntent);
+						view.removeView(fiveButton);
+					}
+				});
+				view.addView(fiveButton);
+
 			} else {
 				sum.setText("Süsteemi või ühenduse viga!");
 				view.setBackgroundColor(Color.parseColor("#F4C430"));
