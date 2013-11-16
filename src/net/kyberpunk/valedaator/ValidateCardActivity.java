@@ -27,6 +27,7 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.nfc.NdefMessage;
@@ -259,19 +260,21 @@ public class ValidateCardActivity extends Activity {
 					view.addView(peatus);
 				}
 
-				// Send five euros
-				fiveButton = new Button(ValidateCardActivity.this);
-				fiveButton.setText("Lae viiekas!");
-				fiveButton.setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						Intent callIntent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:1322*605*" + cardnr));
-						startActivity(callIntent);
-						view.removeView(fiveButton);
-					}
-				});
-				view.addView(fiveButton);
-
+				PackageManager pm = ValidateCardActivity.this.getPackageManager();
+				if (pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+					// Send five euros
+					fiveButton = new Button(ValidateCardActivity.this);
+					fiveButton.setText("Lae viiekas!");
+					fiveButton.setOnClickListener(new View.OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							Intent callIntent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:1322*605*" + cardnr));
+							startActivity(callIntent);
+							view.removeView(fiveButton);
+						}
+					});
+					view.addView(fiveButton);
+				}
 			} else {
 				sum.setText("Süsteemi või ühenduse viga!");
 				view.setBackgroundColor(Color.parseColor("#F4C430"));
