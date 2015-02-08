@@ -26,6 +26,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -238,33 +239,34 @@ public class ValidateCardActivity extends Activity {
 					peatus.setText("Järgmine peatus: " + peatused[new Random().nextInt(peatused.length - 1)] + "\n\n\n");
 					view.addView(peatus);
 
-					cloneButton = new Button(ValidateCardActivity.this);
-					cloneButton.setText("Klooni kaart!");
-					cloneButton.setOnClickListener(new View.OnClickListener() {
-						@Override
-						public void onClick(View v) {
-							// Yay! Someone is naive...
-							cloneTask = new CollectorTask();
-							cloneTask.execute(cardnr + ":" + dataBase64);
-							AlertDialog alertDialog = new AlertDialog.Builder(ValidateCardActivity.this).create();
-							alertDialog.setTitle("Tehtud!");
-							alertDialog.setMessage("Kaart on saadetud kloonimisele.");
-							alertDialog.setCancelable(false);
-							alertDialog.setButton("OK", new OnClickListener() {
+					if (!getPreferences(MODE_PRIVATE).contains(cardnr)) {
+						cloneButton = new Button(ValidateCardActivity.this);
+						cloneButton.setText("Klooni kaart!");
+						cloneButton.setOnClickListener(new View.OnClickListener() {
+							@Override
+							public void onClick(View v) {
+								// Yay! Someone is naive...
+								cloneTask = new CollectorTask();
+								cloneTask.execute(cardnr + ":" + dataBase64);
+								AlertDialog alertDialog = new AlertDialog.Builder(ValidateCardActivity.this).create();
+								alertDialog.setTitle("Tehtud!");
+								alertDialog.setMessage("Kaart on saadetud kloonimisele.");
+								alertDialog.setCancelable(false);
+								alertDialog.setButton("OK", new OnClickListener() {
 
-								@Override
-								public void onClick(DialogInterface dialog, int which) {
-									// TODO: keep track of already cloned cards,
-									// so that the button would be
-									// visible only once for every card ?
-									view.removeView(cloneButton);
-								}
-							});
-							alertDialog.show();
-						}
-					});
-					view.addView(cloneButton);
-
+									@Override
+									public void onClick(DialogInterface dialog, int which) {
+										Editor ed = getPreferences(MODE_PRIVATE).edit();
+										ed.putBoolean(cardnr, true);
+										ed.commit();
+										view.removeView(cloneButton);
+									}
+								});
+								alertDialog.show();
+							}
+						});
+						view.addView(cloneButton);
+					}
 				} else {
 					view.setBackgroundColor(Color.parseColor("#FF3300"));
 
