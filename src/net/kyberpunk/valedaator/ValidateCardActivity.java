@@ -73,14 +73,27 @@ public class ValidateCardActivity extends Activity {
 
 		// No card detected or app started from home screen.
 		if (!getIntent().hasExtra(NfcAdapter.EXTRA_NDEF_MESSAGES)) {
-			TextView txt = new TextView(this);
-			txt.setText("Näita kaarti!");
-			txt.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30);
-			view.addView(txt);
+			if (!getPackageManager().hasSystemFeature("com.nxp.mifare")) {
+				AlertDialog.Builder alert = new AlertDialog.Builder(this);
+			    alert.setTitle("Puudub MIFARE tugi");
+			    alert.setMessage("Sinu telefon ei toeta Ühiskaardi poolt kasutatavat vana ja omanduslikku tehnoloogiat.");
 
-			peatus = new TextView(ValidateCardActivity.this);
-			peatus.setText("Järgmine peatus: " + peatused[new Random().nextInt(peatused.length - 1)] + "\n\n\n");
-			view.addView(peatus);
+			    alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			        public void onClick(DialogInterface dialog, int whichButton) {
+			           finish();
+			        }
+			    });
+			    alert.show();
+			} else {
+				TextView txt = new TextView(this);
+				txt.setText("Näita kaarti!");
+				txt.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30);
+				view.addView(txt);
+
+				peatus = new TextView(ValidateCardActivity.this);
+				peatus.setText("Järgmine peatus: " + peatused[new Random().nextInt(peatused.length - 1)] + "\n\n\n");
+				view.addView(peatus);
+			}
 		} else {
 			Parcelable[] msgs = getIntent().getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
 			NdefMessage[] ndef = new NdefMessage[msgs.length];
